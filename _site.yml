@@ -9,6 +9,9 @@ navbar:
     - text: "GIS Work"
       icon: fa-globe
       href: geog176A.html
+    - text: "Liam's CV"
+      icon: fa- graduation-cap
+      href: cv.html
 output:
   html_document:
     theme: darkly
