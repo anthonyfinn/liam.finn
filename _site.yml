@@ -10,7 +10,7 @@ navbar:
       icon: fa-globe
       href: geog176A.html
     - text: "Liam's CV"
-      icon: fa- graduation-cap
+      icon: fa-info 
       href: cv.html
 output:
   html_document:
