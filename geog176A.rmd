@@ -1,0 +1,11 @@
+---
+title: "Projects"
+---
+
+This past summer, I took an introductory Geographic Information Systems/Science course. This course provided me with hands on GIS experience, as well as useful coding skills, specifically using R. In fact, that course taught me how to create this website! Here is a collection of some of my work.
+
+## [Building a project website]()
+
+-In this assignment, I built my first website -I created a repository on github, which essentially is a storage space for my projects
+-Once I created my repo and linked it to RStudio, I created files that provided my website with instructions
+-This included tasks like where to include text (like this), images, and links.

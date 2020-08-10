@@ -1,0 +1,14 @@
+name: "Liam's Website"
+output_dir: "."
+navbar:
+  title: "Liam's Website"
+  left:
+    - text: "Home"
+      icon: fa-home
+      href: index.html
+    - text: "GIS Work"
+      icon: fa-globe
+      href: geog176A.html
+output:
+  html_document:
+    theme: darkly
