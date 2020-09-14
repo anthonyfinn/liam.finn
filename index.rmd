@@ -10,5 +10,8 @@ I am recent graduate of UCSB, where I studied Geography/GIS. I most recently wor
 
 I am interested in pursuing a career that involves additive manufacturing or 3D modeling. I have experience in 3D printing, and I hope to combine this with what I've recently studied; Geography/GIS/Geoinformatics. This includes data visualization, modeling, as well as terrain and surface analysis. I have worked with vector, raster, and tabular data in a coding environment (R). Whether as a GIS Analyst or Technician, I will use my education and work experience to make practical sense of processed data and apply it to a real world application (such as Civil Engineering)
 
+Here is a link to my Github profile (https://github.com/anthonyfinn). I can be contacted at lfinn443@gmail.com 
+
+
 <center>
 ![](img/IMG_2485.jpeg.jpg){width="40%"}
