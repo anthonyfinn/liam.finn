@@ -1,0 +1,212 @@
+---
+title: "Geography 176A"
+author: '[Liam Finn](https://anthonyfinn.github.io/liam.finn/)'
+subtitle: 'Lab 04: Tesselations, Point-in-Polygon'
+output:
+  html_document:
+    theme: darkly
+---
+```{r}
+library(tidyverse)
+library(sf)
+library(units)
+library(ggplot2)
+library(ggrepel)
+library(gghighlight)
+library(ggthemes)
+library(knitr)
+library(leaflet)
+library(USAboundaries)
+library(rmapshaper)
+library(USAboundariesData)
+library(kableExtra)
+sf::st_transform
+```
+1.1 Spatial file of US Counties
+```{r}
+counties <- USAboundaries::us_counties() 
+states <- USAboundaries::us_states() %>% 
+  filter(!name %in% c("Hawaii", "Alaska", "Puerto Rico")) %>%  st_transform(5070) %>% 
+  mutate(id= 1:n())
+
+conus<- counties %>% 
+  filter(!state_name %in% c("Hawaii", "Alaska", "Puerto Rico")) %>%  st_transform(5070) %>% 
+  mutate(id= 1:n())
+
+
+```
+1.2 Anchors
+```{r}
+counties = st_transform(us_counties(), 5070) %>% 
+  select(name, geoid, state_name) %>% 
+  get_conus('state_name')
+mapview::npts(us_counties) #56558
+mapview::npts(conus_counties) #56477
+mapview::npts(counties)    #51966
+conus = USAboundaries::us_counties() %>% 
+  filter(!state_name %in% c("Hawaii", "Puerto Rico", "Alaska", "Guam", "District of Columbia")) %>% 
+  st_transform(5070)
+```
+
+```{r}
+county_centroid = st_centroid(counties) %>% 
+  st_combine() %>% 
+  st_cast("MULTIPOINT")
+```
+1.3 Tessellations/Coverages
+```{r}
+vor = st_voronoi(county_centroid) %>% 
+  st_cast() %>% 
+  st_as_sf() %>% 
+  mutate(id = 1:n())
+
+triangle = st_triangulate(county_centroid) %>% 
+  st_cast() %>% 
+  st_as_sf() %>% 
+  mutate(id = 1:n())
+
+square = st_make_grid(county_centroid, n = c(70, 50)) %>% 
+  st_as_sf() %>% 
+  mutate(id = 1:n())
+
+hexagon = st_make_grid(county_centroid, n = c(70, 50), square = FALSE) %>% 
+  st_as_sf() %>% 
+  mutate(id = 1:n())
+```
+
+```{r}
+county_centroid_union = st_union(county_centroid)
+
+counties_u = counties %>% 
+  st_union()
+
+vor = vor %>% 
+  st_intersection(counties_u)
+
+triangle = triangle %>% 
+  st_intersection(counties_u)
+
+square = square %>% 
+  st_intersection(counties_u)
+
+hexagon = hexagon %>% 
+  st_intersection(counties_u)
+```
+
+1.4 
+```{r}
+plot_tess = function(data, title){
+  ggplot() + 
+    geom_sf(data = data, fill = "white", col = "red", size = .2) +   
+    theme_void() +
+    labs(title = title, caption = paste("# of Tesselations:", nrow(data), "tiles" )) +
+    theme(plot.title = element_text(hjust = .5, color =  "red", face = "bold"))
+}
+resolved_counties = counties %>% 
+  ms_simplify(keep = 0.05)
+```
+
+Plots
+```{r}
+plot_tess(counties, "Counties") #original
+plot_tess(vor, "Voronoi") #voronoi
+plot_tess(triangle, "Triangulated") #Triangulated
+plot_tess(hexagon, "Hexagonial") #Hexagonal
+plot_tess(square, "Square") #Square
+```
+
+2.1
+```{r}
+tess_summary = function(sf_object, descrip){
+  object_area = st_area(sf_object) %>% 
+    set_units("km^2") %>% 
+    drop_units()
+  area_df= data.frame(tesselation = descrip, features = max(sf_object$id), mean_area = mean(object_area), std_area = sd(object_area), tot_area = sum(object_area))
+return(area_df)
+}
+```
+
+
+```{r}
+tess_summary(counties, "Original, No Tesselation")
+tess_summary(vor, "Voroni Tesselation")
+tess_summary(triangle, 'Triangular Tesselation')
+tess_summary(hexagon, 'Hexagonal Cover')
+tess_summary(square, "Grid Cover")
+```
+
+2.3
+```{r}
+tess_summary_bound = bind_rows(
+  tess_summary(counties, "Original, No Tesselation"),
+tess_summary(vor, "Voroni Tesselation"),
+tess_summary(triangle, 'Triangular Tesselation'),
+tess_summary(hexagon, 'Hexagonal Cover'),
+tess_summary(square, "Grid Cover"),
+  
+)
+
+```
+
+2.4
+```{r}
+knitr::kable(tess_summary_bound, caption = 'Tesselated Surfaces', col.names = c('Type', 'Features', 'Mean Area', 'SD of Area', 'Total Area'))
+```
+
+3.1
+```{r}
+library(readxl)
+dam_data <- read_excel("/Users/lfinn443/github/geog-176A-labs/data/NID2019_U.xlsx") 
+  
+
+dam_2019 <- dam_data %>% 
+  filter(!is.na(LONGITUDE), !is.na(LATITUDE)) %>% 
+  st_as_sf(coords = c('LONGITUDE', 'LATITUDE'), crs = 4326) %>% 
+  st_transform(5070)
+```
+3.2
+```{r}
+point_in_polygon = function(points, polygon, bar){
+  st_join(polygon, points) %>% 
+    st_drop_geometry() %>% 
+    count(get(bar)) %>% 
+    setNames(c(bar, "n")) %>% 
+    left_join(polygon, by = bar) %>% 
+    st_as_sf()
+}
+```
+3.3
+```{r}
+county_dams = point_in_polygon(dam_2019, counties, 'geoid')
+vor_dams = point_in_polygon(dam_2019, conus_voroni, 'id')
+tri_dams = point_in_polygon(dam_2019, conus_tri, 'id')
+sq_dams = point_in_polygon(dam_2019, conus_grd, 'id')
+hex_dams = point_in_polygon(dam_2019, conus_hex, 'id')
+
+```
+3.4
+```{r}
+dam_plot= function(data=data, text)
+  {ggplot() +
+    geom_sf(data = data, aes(fill = log(n)), alpha = .8, size = .2, col = NA) +
+    scale_fill_viridis_c() +
+    theme_void() +
+    theme(legend.position = 'none',
+          plot.title = element_text(face = "bold", color = "black",  size = 24)) +
+    labs(title = text,
+         caption = paste0(sum(data$n), " Dams "))}
+
+```
+3.5
+```{r}
+dam_plot_vor = dam_plot(vor_dams, "US Dams: Voroni Tesselation")
+
+dam_plot_tri = dam_plot(tri_dams, "US Dams: Triangulation Tesselation")
+
+dam_plot_sq = dam_plot(sq_dams, "US Dams: Grid Cover")
+
+dam_plot_hex = dam_plot(hex_dams, "US Dams: Hexagonal Cover")
+
+dam_plot_county = dam_plot(county_dams, "US Dams: County lines")
+```
+
