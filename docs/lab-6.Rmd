@@ -7,6 +7,9 @@ output:
   html_document:
     theme: darkly
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, out.width = "75%", fig.align = 'center')
+```
 
 ```{r, include=FALSE}
 library(sf)        # vector manipulation
@@ -36,11 +39,11 @@ basin_elevation = elevatr::get_elev_raster(boundary, z = 13) %>%
 
 basin_in_feet = basin_elevation *3.281
 
-writeRaster(basin_in_feet, filename = "/Users/lfinn443/github/liam.finn/data/basin_elevation.tif", overwrite = T)
+writeRaster(basin_in_feet, filename = "/Users/lfinn443/github/geog-176A-labs/data/basin_elevation.tif", overwrite = T)
 ```
 
 
-Buildings and river-network data
+#Buildings and river-network data
 ```{r}
 building = osmdata::add_osm_feature(opq(boundary), "building") %>% 
   osmdata_sf()
@@ -54,15 +57,15 @@ river = st_intersection(stream$osm_lines, boundary)
 
 #TERRAIN ANALYSIS
 
-Hillshade
+#Hillshade
 ```{r}
-wbt_hillshade("/Users/lfinn443/github/liam.finn/data/basin_elevation.tif", "/Users/lfinn443/github/liam.finn/data/hillshade.tif")
+wbt_hillshade("/Users/lfinn443/github/geog-176A-labs/data/basin_elevation.tif", "/Users/lfinn443/github/geog-176A-labs/data/hillshade.tif")
 
-hillshade = raster("/Users/lfinn443/github/liam.finn/data/hillshade.tif")
+hillshade = raster("/Users/lfinn443/github/geog-176A-labs/data/hillshade.tif")
 
 ```
 
-Plots
+#Plots
 ```{r}
 plot(hillshade, col = gray.colors(256, alpha = .5), legend = F)
 plot(river$geometry, col = "blue3", add = T)
@@ -70,34 +73,33 @@ plot(boundary$geometry, add = T)
 ```
 
 
-QUESTION 2: HEIGHT ABOVE NEAREST DRAINAGE
+#QUESTION 2: HEIGHT ABOVE NEAREST DRAINAGE
 
-Creating the River Raster
+#Creating the River Raster
 ```{r}
 river_raster = st_transform(river, 5070) %>% 
   st_buffer(10) %>% 
   st_transform(crs(basin_in_feet)) %>% 
   fasterize::fasterize(basin_in_feet) %>% 
-  writeRaster("../data/river_raster.tif", overwrite = T)
+  writeRaster("/Users/lfinn443/github/geog-176A-labs/data/river_raster.tif", overwrite = T)
 ```
 
-Creating the hydrologically corrected surface
+#Creating the hydrologically corrected surface
 ```{r}
-wbt_breach_depressions("../data/basin_elevation.tif",
-                       "../data/breach_depression.tif")
+wbt_breach_depressions("/Users/lfinn443/github/geog-176A-labs/data/basin_elevation.tif",
+                       "/Users/lfinn443/github/geog-176A-labs//data/breach_depression.tif")
 ```
 
-Creating the Hand Raster
+#Creating the Hand Raster
 ```{r}
-wbt_elevation_above_stream("../data/breach_depression.tif", "../data/river_raster.tif", "../data/ft_above_str.tif")
+wbt_elevation_above_stream("/Users/lfinn443/github/geog-176A-labs/data/breach_depression.tif", "/Users/lfinn443/github/geog-176A-labs/data/river_raster.tif", "/Users/lfinn443/github/geog-176A-labs/data/ft_above_str.tif")
 ```
 
 ```{r}
-river_raster = raster("../data/river_raster.tif")
-hand_raster = raster("../data/ft_above_str.tif") +3.69
+river_raster = raster("/Users/lfinn443/github/geog-176A-labs/data/river_raster.tif")
+hand_raster = raster("/Users/lfinn443/github/geog-176A-labs/data/ft_above_str.tif") +3.69
 
 hand_raster[river_raster ==1] = 0
 
-writeRaster(hand_raster, "../data/correct_to_lrd.tif", overwrite = T)
+writeRaster(hand_raster, "/Users/lfinn443/github/geog-176A-labs/data/correct_to_lrd.tif", overwrite = T)
 ```
-
