@@ -31,6 +31,8 @@ Here, I carried out a flood analysis of a 2016 flooding in Paso, Iowa. I used La
 <center>
 ![](img/lab_5_image.png){width="40%"}
 
-## [Lab 6: Terrain Analysis]()
-Using HAND (Height above nearest drainage) flood mapping methodology, we estimated the number of buildings impacted by the 2017 Mission Creek flood. The data included representations of the elevation grid, the river network, and building structures. 
+## [Lab 6: Terrain Analysis](https://anthonyfinn.github.io/liam.finn/lab-6.html)
+Using HAND (Height above nearest drainage) flood mapping methodology, we estimated the number of buildings impacted by the 2017 Mission Creek flood. The data included representations of the elevation grid, the river network, and building structures.
+<center>
+![](img/lab_6_image.png){width="40%"}
 
