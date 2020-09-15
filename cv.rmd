@@ -1,5 +1,5 @@
 ---
-subtitle: "See full Resume at bottom of page"
+title: "Curriculum vitae"
 ---
 
 ## *Education*
