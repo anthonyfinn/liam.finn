@@ -1,0 +1,66 @@
+---
+title: "Lab 6"
+author: "Liam Finn"
+subtitle: "Terrain Analysis"
+date: "9/14/2020"
+output:
+  html_document:
+    theme: darkly
+---
+
+```{r, include=FALSE}
+library(sf)        # vector manipulation
+library(raster)    # raster manipulation
+library(fasterize) # "faster" raster
+library(whitebox)  # terrain analysis
+
+# Data libraries
+library(osmdata)   # OSM API
+library(elevatr)   # Elevation  Web Tiles
+```
+
+COLLECTING DATA
+
+Basin Boundary
+```{r}
+boundary = read_sf("https://labs.waterdata.usgs.gov/api/nldi/linked-data/nwissite/USGS-11119750/basin")
+```
+
+
+Elevation Data
+```{r}
+basin_elevation = elevatr::get_elev_raster(boundary, z = 13) %>%
+  crop(boundary) %>% 
+  mask(boundary) 
+
+basin_in_feet = basin_elevation *3.281
+
+writeRaster(basin_in_feet, filename = "/Users/lfinn443/github/liam.finn/data/basin_elevation.tif", overwrite = T)
+```
+
+
+Buildings and river-network data
+```{r}
+building = osmdata::add_osm_feature(opq(boundary), "building") %>% 
+  osmdata_sf()
+
+stream = osmdata::add_osm_feature(opq(boundary), "waterway", "stream") %>% osmdata_sf()
+building = st_intersection(building$osm_polygons, boundary)
+
+river = st_intersection(stream$osm_lines, boundary)
+```
+
+
+TERRAIN ANALYSIS
+
+Hillshade
+```{r}
+wbt_hillshade("/Users/lfinn443/github/liam.finn/data/basin_elevation.tif", "/Users/lfinn443/github/liam.finn/data/hillshade.tif")
+
+hillshade = raster("/Users/lfinn443/github/liam.finn/data/hillshade.tif")
+
+plot(hillshade, col = gray.colors(256, alpha = .5), legend = F)
+plot(river$geometry, col = "blue3", add = T)
+plot(boundary$geometry, add = T)
+```
+
