@@ -1,6 +1,8 @@
 ---
-title: "*Education*"
+subtitle: "See full Resume at bottom of page"
 ---
+
+## *Education*
 -Graduated from UCSB: June **2020 ** 
 
 -B.A. Geography (GIS)
@@ -11,7 +13,8 @@ title: "*Education*"
 
 -A.A. in Economics and Business Administration
 
-## [*Experience*]()
+
+## *Experience*
 
 -3D Printing Technician: June **2019** through January **2020**
 
@@ -27,4 +30,10 @@ title: "*Education*"
 -Facilitated student outreach
 
 -Organized panel presentations on various topics
+
+
+
+## *Resume*
+<center>
+![](img/resume_jpeg.jpg)
 
