@@ -19,15 +19,16 @@ library(osmdata)   # OSM API
 library(elevatr)   # Elevation  Web Tiles
 ```
 
-COLLECTING DATA
 
-Basin Boundary
+
+#1 DATA INGEST
+
 ```{r}
 boundary = read_sf("https://labs.waterdata.usgs.gov/api/nldi/linked-data/nwissite/USGS-11119750/basin")
 ```
 
 
-Elevation Data
+
 ```{r}
 basin_elevation = elevatr::get_elev_raster(boundary, z = 13) %>%
   crop(boundary) %>% 
@@ -51,7 +52,7 @@ river = st_intersection(stream$osm_lines, boundary)
 ```
 
 
-TERRAIN ANALYSIS
+#TERRAIN ANALYSIS
 
 Hillshade
 ```{r}
@@ -59,8 +60,44 @@ wbt_hillshade("/Users/lfinn443/github/liam.finn/data/basin_elevation.tif", "/Use
 
 hillshade = raster("/Users/lfinn443/github/liam.finn/data/hillshade.tif")
 
+```
+
+Plots
+```{r}
 plot(hillshade, col = gray.colors(256, alpha = .5), legend = F)
 plot(river$geometry, col = "blue3", add = T)
 plot(boundary$geometry, add = T)
+```
+
+
+QUESTION 2: HEIGHT ABOVE NEAREST DRAINAGE
+
+Creating the River Raster
+```{r}
+river_raster = st_transform(river, 5070) %>% 
+  st_buffer(10) %>% 
+  st_transform(crs(basin_in_feet)) %>% 
+  fasterize::fasterize(basin_in_feet) %>% 
+  writeRaster("../data/river_raster.tif", overwrite = T)
+```
+
+Creating the hydrologically corrected surface
+```{r}
+wbt_breach_depressions("../data/basin_elevation.tif",
+                       "../data/breach_depression.tif")
+```
+
+Creating the Hand Raster
+```{r}
+wbt_elevation_above_stream("../data/breach_depression.tif", "../data/river_raster.tif", "../data/ft_above_str.tif")
+```
+
+```{r}
+river_raster = raster("../data/river_raster.tif")
+hand_raster = raster("../data/ft_above_str.tif") +3.69
+
+hand_raster[river_raster ==1] = 0
+
+writeRaster(hand_raster, "../data/correct_to_lrd.tif", overwrite = T)
 ```
 

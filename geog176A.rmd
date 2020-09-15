@@ -27,7 +27,7 @@ This lab involved a huge amount of data, in which I practiced skills such as wri
 
 
 ## [Lab 5:Raster Analysis](https://anthonyfinn.github.io/geog-176A-labs/lab-05.html)
-Here, I carried out a flood analysis of a 2016 flooding in Paso, Iowa. I used Landsat Satellite Images and filtered them to my area of interest. Using various band combinations, I plotted multiple images examining this flood, each of which isolated different features of the flood. 
+Here, I carried out a flood analysis of a 2016 flooding in Paso, Iowa. I used Landsat Satellite Images and filtered them to my area of interest. Using various band combinations, I plotted multiple images examining this flood, each of which isolated different features of the flood. The image below demonstrates the NDVI (measures plant health) levels. 
 <center>
 ![](img/lab_5_image.png){width="40%"}
 
